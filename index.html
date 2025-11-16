@@ -1,0 +1,1860 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Undangan Pernikahan Digital</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-analytics.js";
+        import { getFirestore, collection, addDoc, getDocs, orderBy, query, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBBFkxY2PUD3a7YM3Q1lEl2ylPtuVhNOY8",
+            authDomain: "ucapan-nikah.firebaseapp.com",
+            projectId: "ucapan-nikah",
+            storageBucket: "ucapan-nikah.firebasestorage.app",
+            messagingSenderId: "1051280749289",
+            appId: "1:1051280749289:web:d1961184904543d267b678",
+            measurementId: "G-2WRHH9WR4Y"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app);
+
+        // Make Firebase available globally
+        window.firebaseApp = app;
+        window.firebaseDb = db;
+        window.firebaseAddDoc = addDoc;
+        window.firebaseGetDocs = getDocs;
+        window.firebaseCollection = collection;
+        window.firebaseOrderBy = orderBy;
+        window.firebaseQuery = query;
+        window.firebaseSetDoc = setDoc;
+        window.firebaseDoc = doc;
+        window.firebaseGetDoc = getDoc;
+        window.firebaseUpdateDoc = updateDoc;
+    </script>
+    <style>
+        :root {
+            --primary: #d4af37;
+            --secondary: #8b7355;
+            --light: #f9f5f0;
+            --dark: #333;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Cover Styles */
+        #cover {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                        url('https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80') no-repeat center center/cover;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            z-index: 9999;
+            padding: 20px;
+            transition: transform 1s ease, opacity 1s ease;
+        }
+
+        #cover.open {
+            transform: translateY(-100%);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .cover-couple-names {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            font-weight: 500;
+            letter-spacing: 3px;
+            transform: translateY(30px);
+            opacity: 0;
+            animation: fadeInUp 1s ease 0.5s forwards;
+        }
+
+        .cover-date {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+            transform: translateY(30px);
+            opacity: 0;
+            animation: fadeInUp 1s ease 0.8s forwards;
+        }
+
+        .cover-guest {
+            transform: translateY(30px);
+            opacity: 0;
+            animation: fadeInUp 1s ease 1.1s forwards;
+        }
+
+        .open-invitation {
+            background-color: transparent;
+            color: white;
+            border: 2px solid white;
+            padding: 12px 40px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 30px;
+            transform: translateY(30px);
+            opacity: 0;
+            animation: fadeInUp 1s ease 1.4s forwards;
+        }
+
+        .open-invitation:hover {
+            background-color: white;
+            color: var(--dark);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        /* Music Control */
+        .music-control {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: var(--primary);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .music-control:hover {
+            transform: scale(1.1);
+        }
+
+        /* Main Content Styles */
+        #main-content {
+            display: none;
+        }
+
+        .hero-section {
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                        url('https://images.unsplash.com/photo-1519225421980-715cb0215aed?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80') no-repeat center center/cover;
+            color: white;
+            padding: 150px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .couple-names {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            font-weight: 500;
+            letter-spacing: 3px;
+        }
+
+        .wedding-date {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+        }
+
+        .section-padding {
+            padding: 100px 0;
+            position: relative;
+        }
+
+        /* Countdown Styles - More Subtle */
+        .countdown-section {
+            background: rgba(212, 175, 55, 0.1);
+            padding: 80px 0;
+            text-align: center;
+        }
+
+        .countdown-title {
+            font-size: 1.8rem;
+            margin-bottom: 40px;
+            color: var(--secondary);
+            font-weight: 300;
+        }
+
+        .countdown-container {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            flex-wrap: wrap;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .countdown-item {
+            background: rgba(255, 255, 255, 0.8);
+            padding: 25px 15px;
+            border-radius: 15px;
+            min-width: 110px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .countdown-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .countdown-number {
+            font-size: 2.2rem;
+            font-weight: 300;
+            display: block;
+            color: var(--secondary);
+            margin-bottom: 5px;
+        }
+
+        .countdown-label {
+            font-size: 0.85rem;
+            color: #666;
+            letter-spacing: 1px;
+        }
+
+        /* Section Background Images */
+        .couple-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/foto/IMG_9147.JPG') no-repeat center center/cover;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .event-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/foto/IMG_9176.JPG') no-repeat center center/cover;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .rsvp-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/foto/IMG_9232.JPG') no-repeat center center/cover;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .wishes-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/foto/IMG_9312.JPG') no-repeat center center/cover;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .gallery-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/foto/IMG_9339.JPG') no-repeat center center/cover;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 50px;
+            color: var(--secondary);
+            position: relative;
+        }
+
+        .section-title:after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 3px;
+            background: var(--primary);
+            margin: 15px auto;
+            transform: scaleX(0);
+            transition: transform 0.8s ease;
+        }
+
+        .section-title.in-view:after {
+            transform: scaleX(1);
+        }
+
+        /* Couple Photos - Rectangular - DIKECILKAN */
+        .couple-card {
+            text-align: center;
+            padding: 30px 15px;
+            transform: translateY(50px);
+            opacity: 0;
+            transition: all 0.8s ease;
+        }
+
+        .couple-card.in-view {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .couple-image {
+            width: 100%;
+            /* height: 280px; DIKECILKAN dari 350px */
+            object-fit: cover;
+            border: 5px solid var(--primary);
+            margin-bottom: 20px;
+            transform: scale(0.9);
+            transition: all 0.6s ease;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .couple-card.in-view .couple-image {
+            transform: scale(1);
+        }
+
+        .couple-name {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: var(--secondary);
+        }
+
+        .parents-info {
+            margin-top: 15px;
+            font-style: italic;
+            color: #666;
+        }
+
+        .event-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            height: 100%;
+            transition: all 0.5s ease;
+            transform: translateY(50px);
+            opacity: 0;
+        }
+
+        .event-card.in-view {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .event-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .event-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            transform: scale(0);
+            transition: transform 0.6s ease 0.3s;
+        }
+
+        .event-card.in-view .event-icon {
+            transform: scale(1);
+        }
+
+        .event-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--secondary);
+        }
+
+        .btn-maps {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-maps:hover {
+            background: var(--secondary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Gallery dengan Horizontal Scroll */
+        .gallery-section {
+            overflow: hidden;
+        }
+
+        .gallery-scroll-container {
+            display: flex;
+            overflow-x: auto;
+            gap: 20px;
+            padding: 20px 10px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .gallery-scroll-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .gallery-scroll-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .gallery-scroll-container::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+
+        .gallery-scroll-container::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary);
+        }
+
+        .gallery-card {
+            min-width: 300px;
+            height: 400px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            transition: all 0.4s ease;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .gallery-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+        }
+
+        .gallery-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .gallery-card:hover img {
+            transform: scale(1.1);
+        }
+
+        .gallery-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+            padding: 20px;
+            color: white;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-card:hover .gallery-overlay {
+            transform: translateY(0);
+        }
+
+        .gallery-nav {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .gallery-nav-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: none;
+            background: #ddd;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .gallery-nav-btn.active {
+            background: var(--primary);
+            transform: scale(1.2);
+        }
+
+        .rsvp-form {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(50px);
+            opacity: 0;
+            transition: all 0.8s ease;
+        }
+
+        .rsvp-form.in-view {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            padding: 12px 30px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary);
+            border-color: var(--secondary);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Wishes Container - DIUBAH TANPA SCROLL HORIZONTAL */
+        .wishes-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(50px);
+            opacity: 0;
+            transition: all 0.8s ease;
+            overflow: hidden; /* Mencegah scroll horizontal */
+        }
+
+        .wishes-container.in-view {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .wishes-scroll-container {
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+            margin-bottom: 20px;
+            width: 100%; /* Pastikan lebar penuh */
+            overflow-x: hidden; /* Hilangkan scroll horizontal */
+        }
+
+        /* Custom Scrollbar untuk Wishes */
+        .wishes-scroll-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .wishes-scroll-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .wishes-scroll-container::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+
+        .wishes-scroll-container::-webkit-scrollbar-thumb:hover {
+            background: var(--secondary);
+        }
+
+        .wish-item {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            animation: slideInWish 0.6s ease forwards;
+            opacity: 0;
+            transform: translateY(20px);
+            width: 100%; /* Pastikan lebar penuh */
+            box-sizing: border-box; /* Pastikan padding tidak menambah lebar */
+        }
+
+        @keyframes slideInWish {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .wish-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--primary);
+        }
+
+        .wish-author {
+            font-weight: bold;
+            color: var(--secondary);
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        .wish-text {
+            margin: 0;
+            font-style: italic;
+            color: #555;
+            line-height: 1.5;
+            word-wrap: break-word; /* Pastikan teks panjang tidak keluar */
+            overflow-wrap: break-word; /* Pastikan teks panjang tidak keluar */
+        }
+
+        .wish-time {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 8px;
+            text-align: right;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Admin Panel Styles */
+        .admin-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+            transition: right 0.5s ease;
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .admin-panel.open {
+            right: 0;
+        }
+
+        .admin-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--primary);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 1001;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            display: none;
+            transition: all 0.3s ease;
+        }
+
+        .admin-toggle:hover {
+            transform: rotate(90deg);
+        }
+
+        .guest-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            transition: all 0.3s ease;
+        }
+
+        .guest-item:hover {
+            background-color: #f9f9f9;
+            transform: translateX(5px);
+        }
+
+        .guest-status {
+            font-size: 0.8rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            margin-left: 10px;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-confirmed {
+            background: #d1edff;
+            color: #0c5460;
+        }
+
+        .status-declined {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .guest-people {
+            font-size: 0.8rem;
+            color: #666;
+            margin-left: 5px;
+        }
+
+        .copy-link {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .copy-link:hover {
+            background: var(--secondary);
+            transform: scale(1.05);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1002;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Floating Elements */
+        .floating {
+            /* animation: floating 3s ease-in-out infinite; */
+        }
+
+        @keyframes floating {
+            0% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .cover-couple-names, .couple-names {
+                font-size: 2.5rem;
+            }
+            
+            .admin-panel {
+                width: 100%;
+                right: -100%;
+            }
+            
+            .event-card, .couple-card {
+                margin-bottom: 30px;
+            }
+
+            .countdown-item {
+                min-width: 80px;
+                padding: 20px 10px;
+            }
+
+            .countdown-number {
+                font-size: 1.8rem;
+            }
+
+            .couple-image {
+                height: 250px; /* DIKECILKAN untuk mobile */
+            }
+
+            .wishes-scroll-container {
+                max-height: 350px;
+            }
+
+            .gallery-card {
+                min-width: 280px;
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Music Control -->
+    <div class="music-control" id="musicControl">
+        <i class="fas fa-play" id="musicIcon"></i>
+    </div>
+    <audio id="weddingMusic" loop>
+        <source src="/musik/musik.mp3" type="audio/mpeg">
+        Browser Anda tidak mendukung elemen audio.
+    </audio>
+
+    <!-- Cover Section -->
+    <div id="cover">
+        <h1 class="cover-couple-names">Tri & Ika</h1>
+        <p class="cover-date">Sabtu, 13 Desember 2025</p>
+        <p class="cover-guest">Kepada Yth.</p>
+        <h2 class="cover-guest" id="coverGuestName">Nama Tamu</h2>
+        <button class="open-invitation floating" id="openInvitation">
+            Buka Undangan <i class="fas fa-chevron-down ms-2"></i>
+        </button>
+    </div>
+
+    <!-- Main Content (Initially Hidden) -->
+    <div id="main-content">
+        <!-- Admin Toggle Button (Only visible on admin page) -->
+        <div class="admin-toggle" id="adminToggle">
+            <i class="fas fa-cog"></i>
+        </div>
+
+        <!-- Admin Panel -->
+        <div class="admin-panel" id="adminPanel">
+            <div class="admin-header d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                <h2 class="admin-title">Panel Admin</h2>
+                <button class="btn-close" id="closeAdmin"></button>
+            </div>
+            
+            <p class="mb-4">Kelola daftar tamu dan lihat konfirmasi kehadiran</p>
+            
+            <div class="add-guest-form mb-4">
+                <div class="mb-3">
+                    <label class="form-label">Tambah Tamu Baru</label>
+                    <input type="text" class="form-control" id="newGuestName" placeholder="Nama tamu">
+                </div>
+                <button class="btn btn-primary w-100" id="addGuestBtn">
+                    Tambah Tamu
+                </button>
+            </div>
+            
+            <div class="guest-list">
+                <h3 class="mb-3">Daftar Tamu & Konfirmasi</h3>
+                <div id="guestListContainer">
+                    <!-- Daftar tamu akan dimuat di sini -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="container">
+                <h1 class="couple-names floating">Tri & Ika</h1>
+                <p class="wedding-date">Sabtu, 13 Desember 2025</p>
+                <p class="to-guest">Kepada Yth.</p>
+                <h2 class="to-guest" id="guestName">Nama Tamu</h2>
+            </div>
+        </section>
+
+        <!-- Couple Section -->
+        <section class="section-padding couple-section">
+            <div class="container">
+                <h2 class="section-title">Mempelai</h2>
+                <div class="row">
+                    <div class="col-md-6 mb-6">
+                        <div class="couple-card">
+                            <img src="/foto/CMP.JPG" 
+                                 alt="Mempelai Pria" class="couple-image">
+                            <h3 class="couple-name">Tri Ramdona (Tri)</h3>
+                            <p class="parents-info">Putra ketiga dari</p>
+                            <p class="parents-info">Bapak Anwar (Alm.) & Ibu Samiah</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="couple-card">
+                            <img src="/foto/CMW.JPG" 
+                                 alt="Mempelai Wanita" class="couple-image">
+                            <h3 class="couple-name">Ika Wardah, S.IP. (Ika)</h3>
+                            <p class="parents-info">Putri dari</p>
+                            <p class="parents-info">Bapak Muhadis & Ibu (Almh.) Sri Rahayu / Siti Rahmawati</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Countdown Section - After Couple Section -->
+        <section class="countdown-section">
+            <div class="container">
+                <h2 class="countdown-title">Menuju Hari Bahagia</h2>
+                <div class="countdown-container" id="countdownContainer">
+                    <!-- Countdown akan dimuat di sini -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Event Section -->
+        <section class="section-padding event-section bg-light">
+            <div class="container">
+                <h2 class="section-title">Acara Pernikahan</h2>
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="event-card">
+                            <div class="event-icon">
+                                <i class="fas fa-mosque"></i>
+                            </div>
+                            <h3 class="event-title">Akad Nikah</h3>
+                            <p class="event-date">Sabtu, 13 Desember 2025</p>
+                            <p class="event-time">08.00 WIB - 10.00 WIB</p>
+                            <p class="event-location">Kediaman Mempelai Wanita</p>
+                            <p class="event-address">Darussalam Selatan 1 RT 003 RW 003, Kel. Batu Sari, Kec. Batuceper, Kota Tangerang</p>
+                            <a href="https://maps.app.goo.gl/y4GfUY6YZvyPP1zE8" target="_blank" class="btn-maps">
+                                <i class="fas fa-map-marker-alt"></i> Buka Maps
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="event-card">
+                            <div class="event-icon">
+                                <i class="fas fa-glass-cheers"></i>
+                            </div>
+                            <h3 class="event-title">Resepsi</h3>
+                            <p class="event-date">Sabtu, 13 Desember 2025</p>
+                            <p class="event-time">11.00 WIB - Selesai</p>
+                            <p class="event-location">Kediaman Mempelai Wanita</p>
+                            <p class="event-address">Darussalam Selatan 1 RT 003 RW 003, Kel. Batu Sari, Kec. Batuceper, Kota Tangerang</p>
+                            <a href="https://maps.app.goo.gl/y4GfUY6YZvyPP1zE8" target="_blank" class="btn-maps">
+                                <i class="fas fa-map-marker-alt"></i> Buka Maps
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RSVP Section -->
+        <section class="section-padding rsvp-section">
+            <div class="container">
+                <h2 class="section-title">Konfirmasi Kehadiran</h2>
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="rsvp-form">
+                            <form id="rsvpForm">
+                                <div class="mb-3">
+                                    <label class="form-label">Nama Lengkap</label>
+                                    <input type="text" class="form-control" id="rsvpName" required readonly>
+                                    <div class="form-text">Nama sudah terisi otomatis dari undangan Anda</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Konfirmasi Kehadiran</label>
+                                    <select class="form-select" id="rsvpAttendance" required>
+                                        <option value="">Pilih konfirmasi</option>
+                                        <option value="hadir">Hadir</option>
+                                        <option value="tidak-hadir">Tidak Hadir</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Jumlah Tamu</label>
+                                    <select class="form-select" id="rsvpGuests" required>
+                                        <option value="">Pilih jumlah tamu</option>
+                                        <option value="1">1 Orang</option>
+                                        <option value="2">2 Orang</option>
+                                        <option value="3">3 Orang</option>
+                                        <option value="4">4 Orang</option>
+                                        <option value="5">5 Orang atau lebih</option>
+                                    </select>
+                                </div>
+                                <!-- <div class="mb-3">
+                                    <label class="form-label">Ucapan & Doa (Opsional)</label>
+                                    <textarea class="form-control" id="rsvpMessage" rows="4" placeholder="Tulis ucapan dan doa untuk mempelai..."></textarea>
+                                </div> -->
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <span id="rsvpButtonText">Kirim Konfirmasi</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Wishes Section dengan Scroll yang Lebih Dinamis -->
+        <section class="section-padding wishes-section bg-light">
+            <div class="container">
+                <h2 class="section-title">Ucapan & Doa</h2>
+                <div class="row justify-content-center">
+                    <div class="col-md-10">
+                        <div class="wishes-container">
+                            <div class="wishes-scroll-container" id="wishesScrollContainer">
+                                <div class="text-center py-4">
+                                    <div class="loading-spinner"></div>
+                                    <span>Memuat ucapan...</span>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <h4>Tambah Ucapan</h4>
+                                <form id="wishForm">
+                                    <div class="mb-3">
+                                        <input type="text" class="form-control" id="wishName" placeholder="Nama Anda" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <textarea class="form-control" id="wishText" rows="3" placeholder="Tulis ucapan dan doa Anda" required></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary" id="wishSubmitBtn">
+                                        <span id="wishButtonText">Kirim Ucapan</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Gallery Section dengan Horizontal Scroll -->
+        <section class="section-padding gallery-section">
+            <div class="container">
+                <h2 class="section-title">Galeri Kami</h2>
+                <div class="gallery-scroll-container" id="galleryScrollContainer">
+                    <div class="gallery-card">
+                        <img src="/foto/IMG_9147.JPG" alt="Gallery 1">
+                        <div class="gallery-overlay">
+                            <h5>Momen Spesial</h5>
+                            <p>Kenangan indah bersama</p>
+                        </div>
+                    </div>
+                    <div class="gallery-card">
+                        <img src="/foto/IMG_9176.JPG" alt="Gallery 2">
+                        <div class="gallery-overlay">
+                            <h5>Kebersamaan</h5>
+                            <p>Detik-detik bahagia</p>
+                        </div>
+                    </div>
+                    <div class="gallery-card">
+                        <img src="/foto/IMG_9232.JPG" alt="Gallery 3">
+                        <div class="gallery-overlay">
+                            <h5>Cinta Sejati</h5>
+                            <p>Perjalanan kami</p>
+                        </div>
+                    </div>
+                    <div class="gallery-card">
+                        <img src="/foto/IMG_9312.JPG" alt="Gallery 4">
+                        <div class="gallery-overlay">
+                            <h5>Janji Suci</h5>
+                            <p>Untuk selamanya</p>
+                        </div>
+                    </div>
+                    <div class="gallery-card">
+                        <img src="/foto/IMG_9339.JPG" alt="Gallery 5">
+                        <div class="gallery-overlay">
+                            <h5>Impian</h5>
+                            <p>Yang menjadi nyata</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="gallery-nav" id="galleryNav">
+                    <!-- Navigation dots akan di-generate oleh JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Closing Section -->
+        <section class="section-padding bg-light">
+            <div class="container text-center">
+                <h2 class="section-title">Terima Kasih</h2>
+                <p class="lead mb-4">Atas kehadiran, doa, dan restu yang telah diberikan,<br>kami mengucapkan terima kasih yang sebesar-besarnya.</p>
+                <h3 class="mb-4 floating">Tri & Ika</h3>
+                <p>Beserta Keluarga Besar</p>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-dark text-white py-4">
+            <div class="container text-center">
+                <p>&copy; 2025 Undangan Pernikahan Tri & Ika. All rights reserved.<br>Created by @frmshrni83</p>
+            </div>
+        </footer>
+
+        <!-- Toast Notification -->
+        <div class="toast align-items-center text-white bg-success border-0" id="copyToast" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">
+                    Link berhasil disalin!
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Data tamu
+        let guests = [];
+        let currentGuestId = null;
+        let currentGuestName = null;
+
+        // DOM Elements
+        const cover = document.getElementById('cover');
+        const mainContent = document.getElementById('main-content');
+        const openInvitation = document.getElementById('openInvitation');
+        const musicControl = document.getElementById('musicControl');
+        const musicIcon = document.getElementById('musicIcon');
+        const weddingMusic = document.getElementById('weddingMusic');
+        const adminToggle = document.getElementById('adminToggle');
+        const adminPanel = document.getElementById('adminPanel');
+        const closeAdmin = document.getElementById('closeAdmin');
+        const addGuestBtn = document.getElementById('addGuestBtn');
+        const newGuestName = document.getElementById('newGuestName');
+        const guestListContainer = document.getElementById('guestListContainer');
+        const rsvpForm = document.getElementById('rsvpForm');
+        const rsvpName = document.getElementById('rsvpName');
+        const wishForm = document.getElementById('wishForm');
+        const wishesScrollContainer = document.getElementById('wishesScrollContainer');
+        const galleryScrollContainer = document.getElementById('galleryScrollContainer');
+        const galleryNav = document.getElementById('galleryNav');
+        const countdownContainer = document.getElementById('countdownContainer');
+        const rsvpButtonText = document.getElementById('rsvpButtonText');
+        const wishButtonText = document.getElementById('wishButtonText');
+        const wishSubmitBtn = document.getElementById('wishSubmitBtn');
+        const copyToast = new bootstrap.Toast(document.getElementById('copyToast'));
+
+        // Wedding date (June 15, 2024)
+        const weddingDate = new Date('2025-12-13T08:00:00');
+
+        // Music Control
+        let isPlaying = false;
+
+        musicControl.addEventListener('click', () => {
+            if (isPlaying) {
+                weddingMusic.pause();
+                musicIcon.className = 'fas fa-play';
+            } else {
+                weddingMusic.play().catch(e => {
+                    console.log('Autoplay prevented, user interaction required');
+                });
+                musicIcon.className = 'fas fa-pause';
+            }
+            isPlaying = !isPlaying;
+        });
+
+        // Open Invitation
+        openInvitation.addEventListener('click', () => {
+            cover.classList.add('open');
+            setTimeout(() => {
+                mainContent.style.display = 'block';
+                // Initialize scroll animations
+                initScrollAnimations();
+                // Start countdown
+                updateCountdown();
+                setInterval(updateCountdown, 1000);
+                // Auto play music after user interaction
+                weddingMusic.play().then(() => {
+                    isPlaying = true;
+                    musicIcon.className = 'fas fa-pause';
+                }).catch(e => {
+                    console.log('Autoplay prevented');
+                });
+            }, 1000);
+        });
+
+        // Countdown Function
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const distance = weddingDate.getTime() - now;
+
+            if (distance < 0) {
+                countdownContainer.innerHTML = '<div class="countdown-item"><span class="countdown-number">0</span><span class="countdown-label">HARI</span></div>';
+                return;
+            }
+
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            countdownContainer.innerHTML = `
+                <div class="countdown-item">
+                    <span class="countdown-number">${days}</span>
+                    <span class="countdown-label">HARI</span>
+                </div>
+                <div class="countdown-item">
+                    <span class="countdown-number">${hours}</span>
+                    <span class="countdown-label">JAM</span>
+                </div>
+                <div class="countdown-item">
+                    <span class="countdown-number">${minutes}</span>
+                    <span class="countdown-label">MENIT</span>
+                </div>
+                <div class="countdown-item">
+                    <span class="countdown-number">${seconds}</span>
+                    <span class="countdown-label">DETIK</span>
+                </div>
+            `;
+        }
+
+        // Firebase Functions for Wishes
+        async function saveWishToFirebase(name, message) {
+            try {
+                const docRef = await window.firebaseAddDoc(window.firebaseCollection(window.firebaseDb, "wishes-wedding"), {
+                    nama: name,
+                    ucapan: message,
+                    timestamp: new Date()
+                });
+                console.log("Ucapan tersimpan dengan ID: ", docRef.id);
+                return true;
+            } catch (error) {
+                console.error("Error menyimpan ucapan: ", error);
+                return false;
+            }
+        }
+
+        async function loadWishesFromFirebase() {
+            try {
+                const q = window.firebaseQuery(
+                    window.firebaseCollection(window.firebaseDb, "wishes-wedding"), 
+                    window.firebaseOrderBy("timestamp", "desc")
+                );
+                const querySnapshot = await window.firebaseGetDocs(q);
+                const wishes = [];
+                
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    wishes.push({
+                        id: doc.id,
+                        nama: data.nama,
+                        ucapan: data.ucapan,
+                        time: formatTimeAgo(data.timestamp?.toDate() || new Date())
+                    });
+                });
+                
+                return wishes;
+            } catch (error) {
+                console.error("Error memuat ucapan: ", error);
+                return [];
+            }
+        }
+
+        // Firebase Functions for Guests
+        async function saveGuestToFirebase(id, name) {
+            try {
+                await window.firebaseSetDoc(window.firebaseDoc(window.firebaseDb, "daftar-tamu", id.toString()), {
+                    id: id,
+                    nama: name,
+                    status: "pending", // pending, hadir, tidak-hadir
+                    jumlah: 0, // jumlah orang yang hadir
+                    updatedAt: new Date()
+                });
+                console.log("Tamu tersimpan dengan ID: ", id);
+                return true;
+            } catch (error) {
+                console.error("Error menyimpan tamu: ", error);
+                return false;
+            }
+        }
+
+        async function loadGuestsFromFirebase() {
+            try {
+                const querySnapshot = await window.firebaseGetDocs(window.firebaseCollection(window.firebaseDb, "daftar-tamu"));
+                const guests = [];
+                
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const encodedName = encodeURIComponent(data.nama);
+                    guests.push({
+                        id: data.id,
+                        name: data.nama,
+                        status: data.status || "pending",
+                        jumlah: data.jumlah || 0,
+                        link: `${window.location.origin}${window.location.pathname}?guest=${encodedName}`
+                    });
+                });
+                
+                return guests;
+            } catch (error) {
+                console.error("Error memuat tamu: ", error);
+                return [];
+            }
+        }
+
+        // Update guest attendance
+        async function updateGuestAttendance(guestId, status, jumlah) {
+            try {
+                await window.firebaseUpdateDoc(window.firebaseDoc(window.firebaseDb, "daftar-tamu", guestId.toString()), {
+                    status: status,
+                    jumlah: parseInt(jumlah),
+                    updatedAt: new Date()
+                });
+                console.log("Status tamu diperbarui: ", guestId, status, jumlah);
+                return true;
+            } catch (error) {
+                console.error("Error memperbarui tamu: ", error);
+                return false;
+            }
+        }
+
+        // Get guest name by ID from Firebase
+        async function getGuestById(guestId) {
+            try {
+                const docRef = window.firebaseDoc(window.firebaseDb, "daftar-tamu", guestId);
+                const docSnap = await window.firebaseGetDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    return docSnap.data();
+                } else {
+                    console.log("Tamu tidak ditemukan");
+                    return null;
+                }
+            } catch (error) {
+                console.error("Error mengambil data tamu: ", error);
+                return null;
+            }
+        }
+
+        function formatTimeAgo(date) {
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - date) / 1000);
+            
+            if (diffInSeconds < 60) return 'Baru saja';
+            if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} menit yang lalu`;
+            if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} jam yang lalu`;
+            return `${Math.floor(diffInSeconds / 86400)} hari yang lalu`;
+        }
+
+        // Load Wishes from Firebase - SEMUA UCAPAN LANGSUNG DITAMPILKAN
+        async function loadWishes() {
+            wishesScrollContainer.innerHTML = '<div class="text-center py-4"><div class="loading-spinner"></div><span>Memuat ucapan...</span></div>';
+            
+            const wishes = await loadWishesFromFirebase();
+            
+            if (wishes.length === 0) {
+                wishesScrollContainer.innerHTML = '<div class="text-center py-4"><p>Belum ada ucapan. Jadilah yang pertama mengucapkan!</p></div>';
+                return;
+            }
+            
+            wishesScrollContainer.innerHTML = '';
+            
+            // Tampilkan SEMUA ucapan langsung dengan animasi bertahap
+            wishes.forEach((wish, index) => {
+                setTimeout(() => {
+                    const wishItem = document.createElement('div');
+                    wishItem.className = 'wish-item';
+                    wishItem.style.animationDelay = `${index * 0.1}s`;
+                    wishItem.innerHTML = `
+                        <p class="wish-author">${wish.nama}</p>
+                        <p class="wish-text">${wish.ucapan}</p>
+                        <p class="wish-time">${wish.time}</p>
+                    `;
+                    wishesScrollContainer.appendChild(wishItem);
+                }, index * 100);
+            });
+        }
+
+        // Initialize Gallery dengan Horizontal Scroll
+        function initGallery() {
+            const galleryCards = document.querySelectorAll('.gallery-card');
+            
+            // Create navigation dots
+            galleryNav.innerHTML = '';
+            galleryCards.forEach((_, index) => {
+                const dot = document.createElement('button');
+                dot.className = `gallery-nav-btn ${index === 0 ? 'active' : ''}`;
+                dot.addEventListener('click', () => {
+                    scrollToGalleryCard(index);
+                });
+                galleryNav.appendChild(dot);
+            });
+
+            // Auto scroll gallery
+            let currentGalleryIndex = 0;
+            setInterval(() => {
+                currentGalleryIndex = (currentGalleryIndex + 1) % galleryCards.length;
+                scrollToGalleryCard(currentGalleryIndex);
+            }, 4000);
+        }
+
+        function scrollToGalleryCard(index) {
+            const galleryCards = document.querySelectorAll('.gallery-card');
+            const card = galleryCards[index];
+            const container = galleryScrollContainer;
+            
+            container.scrollTo({
+                left: card.offsetLeft - container.offsetLeft - (container.offsetWidth - card.offsetWidth) / 2,
+                behavior: 'smooth'
+            });
+
+            // Update active dot
+            document.querySelectorAll('.gallery-nav-btn').forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+        }
+
+        // Scroll Animation Observer
+        function initScrollAnimations() {
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('in-view');
+                        
+                        // Special handling for section titles
+                        if (entry.target.classList.contains('section-title')) {
+                            setTimeout(() => {
+                                entry.target.classList.add('in-view');
+                            }, 300);
+                        }
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all animatable elements
+            const animatableElements = document.querySelectorAll(
+                '.couple-card, .event-card, .gallery-card, .rsvp-form, .wishes-container, .wish-item, .section-title'
+            );
+            
+            animatableElements.forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        // Toggle Admin Panel (only on admin page)
+        async function initAdminPanel() {
+            // Cek apakah ini halaman admin
+            if (window.location.pathname === '/admin' || window.location.search.includes('admin=true')) {
+                adminToggle.style.display = 'flex';
+                
+                adminToggle.addEventListener('click', () => {
+                    adminPanel.classList.toggle('open');
+                });
+
+                closeAdmin.addEventListener('click', () => {
+                    adminPanel.classList.remove('open');
+                });
+
+                // Load Guest List from Firebase
+                await loadGuestList();
+
+                // Add New Guest
+                addGuestBtn.addEventListener('click', async () => {
+                    if (newGuestName.value.trim() === '') return;
+                    
+                    const guestName = newGuestName.value.trim();
+                    const guestLink = `${window.location.origin}${window.location.pathname}?guest=${encodeURIComponent(guestName)}`;
+    
+    // Cari ID terakhir
+    const existingGuests = await loadGuestsFromFirebase();
+                    const guestId = guests.length > 0 ? Math.max(...guests.map(g => g.id)) + 1 : 1;
+                    
+                    // Simpan ke Firebase
+                    const success = await saveGuestToFirebase(guestId, guestName);
+                    
+                    if (success) {
+                        const newGuest = {
+                            id: guestId,
+                            name: guestName,
+                            status: "pending",
+                            jumlah: 0,
+                            link: `${window.location.origin}${window.location.pathname}?guest=${guestId}`
+                        };
+                        
+                        guests.push(newGuest);
+                        await loadGuestList();
+                        newGuestName.value = '';
+                        
+                        // Show success message with animation
+                        const successMsg = document.createElement('div');
+                        successMsg.className = 'alert alert-success mt-3';
+                        successMsg.textContent = `Tamu "${guestName}" berhasil ditambahkan!`;
+                        document.querySelector('.add-guest-form').appendChild(successMsg);
+                        
+                        setTimeout(() => {
+                            successMsg.remove();
+                        }, 3000);
+                    } else {
+                        alert('Gagal menambahkan tamu. Silakan coba lagi.');
+                    }
+                });
+            }
+        }
+
+        // Load Guest List from Firebase
+        async function loadGuestList() {
+            guestListContainer.innerHTML = '<div class="text-center py-2"><div class="loading-spinner"></div><span>Memuat daftar tamu...</span></div>';
+            
+            guests = await loadGuestsFromFirebase();
+            
+            if (guests.length === 0) {
+                guestListContainer.innerHTML = '<div class="text-center py-2"><p>Belum ada tamu yang ditambahkan.</p></div>';
+                return;
+            }
+            
+            guestListContainer.innerHTML = '';
+            
+            guests.forEach(guest => {
+                const guestItem = document.createElement('div');
+                guestItem.className = 'guest-item';
+                
+                const statusClass = `status-${guest.status}`;
+                const statusText = guest.status === 'hadir' ? 'Hadir' : 
+                                 guest.status === 'tidak-hadir' ? 'Tidak Hadir' : 'Menunggu';
+                
+                const peopleText = guest.jumlah > 0 ? `${guest.jumlah} orang` : '';
+                
+                guestItem.innerHTML = `
+                    <div class="guest-info">
+                        <div class="guest-name">${guest.name}</div>
+                        <div>
+                            <span class="guest-status ${statusClass}">${statusText}</span>
+                            ${peopleText ? `<span class="guest-people">${peopleText}</span>` : ''}
+                        </div>
+                    </div>
+                    <button class="copy-link" data-link="${guest.link}">
+                        Salin Link
+                    </button>
+                `;
+                guestListContainer.appendChild(guestItem);
+            });
+            
+            // Add event listeners to copy buttons
+            document.querySelectorAll('.copy-link').forEach(button => {
+                button.addEventListener('click', function() {
+                    const link = this.getAttribute('data-link');
+                    copyToClipboard(link);
+                });
+            });
+        }
+
+        // Copy to Clipboard
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text)
+                .then(() => {
+                    copyToast.show();
+                })
+                .catch(err => {
+                    console.error('Gagal menyalin: ', err);
+                    alert('Gagal menyalin link. Silakan coba lagi.');
+                });
+        }
+
+        // Handle RSVP Form
+        rsvpForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const attendance = document.getElementById('rsvpAttendance').value;
+            const guestsCount = document.getElementById('rsvpGuests').value;
+//            const message = document.getElementById('rsvpMessage').value;
+            
+            if (!currentGuestId) {
+                alert('Error: Tidak dapat mengidentifikasi tamu. Silakan refresh halaman.');
+                return;
+            }
+            
+            // Tampilkan loading
+            const submitBtn = this.querySelector('button[type="submit"]');
+            rsvpButtonText.innerHTML = '<div class="loading-spinner"></div> Mengirim...';
+            submitBtn.disabled = true;
+            
+            // Update status kehadiran di Firebase
+            const success = await updateGuestAttendance(currentGuestId, attendance, guestsCount);
+            
+            if (success) {
+                rsvpButtonText.textContent = 'Terkirim!';
+                
+                // Jika ada ucapan, simpan juga
+                if (message.trim() !== '') {
+                    await saveWishToFirebase(currentGuestName, message);
+                    // Reload wishes setelah menambah ucapan baru
+                    setTimeout(() => {
+                        loadWishes();
+                    }, 500);
+                }
+                
+                setTimeout(() => {
+                    rsvpButtonText.textContent = 'Konfirmasi Terkirim';
+                    submitBtn.disabled = true;
+                    
+                    // Tampilkan pesan sukses
+                    alert('Terima kasih telah mengonfirmasi kehadiran Anda!');
+                }, 1000);
+            } else {
+                rsvpButtonText.textContent = 'Gagal, coba lagi';
+                setTimeout(() => {
+                    rsvpButtonText.textContent = 'Kirim Konfirmasi';
+                    submitBtn.disabled = false;
+                }, 2000);
+            }
+        });
+
+        // Handle Wish Form
+        wishForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('wishName').value;
+            const text = document.getElementById('wishText').value;
+            
+            // Tampilkan loading
+            wishButtonText.innerHTML = '<div class="loading-spinner"></div> Mengirim...';
+            wishSubmitBtn.disabled = true;
+            
+            // Simpan ke Firebase
+            const success = await saveWishToFirebase(name, text);
+            
+            if (success) {
+                wishButtonText.textContent = 'Terkirim!';
+                // Reload wishes
+                setTimeout(() => {
+                    loadWishes();
+                    wishButtonText.textContent = 'Kirim Ucapan';
+                    wishSubmitBtn.disabled = false;
+                    this.reset();
+                }, 1000);
+            } else {
+                wishButtonText.textContent = 'Gagal, coba lagi';
+                setTimeout(() => {
+                    wishButtonText.textContent = 'Kirim Ucapan';
+                    wishSubmitBtn.disabled = false;
+                }, 2000);
+            }
+        });
+
+        // Check URL for guest parameter dan auto-fill RSVP form
+        async function checkGuestParameter() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const guestParam = urlParams.get('guest');
+    
+    if (guestParam) {
+        console.log('Parameter guest ditemukan:', guestParam);
+        
+        // Decode URL parameter (untuk handle spasi dan karakter khusus)
+        const decodedGuestName = decodeURIComponent(guestParam);
+        
+        // Set nama di cover dan header langsung dari parameter
+        document.getElementById('guestName').textContent = decodedGuestName;
+        document.getElementById('coverGuestName').textContent = decodedGuestName;
+        
+        // Auto-fill form RSVP
+        rsvpName.value = decodedGuestName;
+        currentGuestName = decodedGuestName;
+        
+        try {
+            // Coba cari tamu di Firebase berdasarkan nama lengkap
+            const guestData = await findGuestByName(decodedGuestName);
+            
+            if (guestData) {
+                console.log('Data tamu ditemukan di Firebase:', guestData);
+                currentGuestId = guestData.id;
+                
+                // Jika sudah pernah konfirmasi, tampilkan status sebelumnya
+                if (guestData.status && guestData.status !== 'pending') {
+                    document.getElementById('rsvpAttendance').value = guestData.status;
+                    if (guestData.jumlah) {
+                        document.getElementById('rsvpGuests').value = guestData.jumlah.toString();
+                    }
+                    
+                    // Nonaktifkan form jika sudah konfirmasi
+                    if (guestData.status === 'hadir' || guestData.status === 'tidak-hadir') {
+                        const submitBtn = rsvpForm.querySelector('button[type="submit"]');
+                        rsvpForm.querySelectorAll('select, textarea').forEach(element => {
+                            element.disabled = true;
+                        });
+                        rsvpButtonText.textContent = 'Sudah Dikonfirmasi';
+                        submitBtn.disabled = true;
+                    }
+                }
+            } else {
+                console.log('Tamu tidak ditemukan di Firebase, menggunakan parameter URL saja');
+                // Jika tidak ditemukan di Firebase, kita tetap bisa menggunakan parameter URL
+                // Tamu akan dibuat otomatis saat submit RSVP
+            }
+        } catch (error) {
+            console.error('Error mencari tamu:', error);
+            // Tetap lanjutkan dengan data dari parameter URL
+        }
+    } else {
+        console.log('Tidak ada parameter guest, menggunakan tamu default');
+        // Default fallback
+        document.getElementById('guestName').textContent = 'Tamu Undangan';
+        document.getElementById('coverGuestName').textContent = 'Tamu Undangan';
+    }
+}
+
+async function findGuestByName(guestName) {
+    try {
+        const querySnapshot = await window.firebaseGetDocs(window.firebaseCollection(window.firebaseDb, "daftar-tamu"));
+        
+        // Cari tamu yang namanya mengandung string yang dicari (case insensitive)
+        const guests = [];
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            guests.push({
+                id: data.id,
+                nama: data.nama,
+                status: data.status || "pending",
+                jumlah: data.jumlah || 0
+            });
+        });
+        
+        // Cari tamu dengan nama yang paling mirip
+        const foundGuest = guests.find(guest => 
+            guest.nama.toLowerCase().includes(guestName.toLowerCase()) ||
+            guestName.toLowerCase().includes(guest.nama.toLowerCase())
+        );
+        
+        return foundGuest || null;
+    } catch (error) {
+        console.error("Error mencari tamu berdasarkan nama:", error);
+        return null;
+    }
+}
+
+// Fungsi untuk membuat tamu baru otomatis jika tidak ditemukan
+async function createNewGuest(guestName) {
+    try {
+        // Generate ID baru
+        const guests = await loadGuestsFromFirebase();
+        const newId = guests.length > 0 ? Math.max(...guests.map(g => g.id)) + 1 : 1;
+        
+        // Simpan ke Firebase
+        await window.firebaseSetDoc(window.firebaseDoc(window.firebaseDb, "daftar-tamu", newId.toString()), {
+            id: newId,
+            nama: guestName,
+            status: "pending",
+            jumlah: 0,
+            updatedAt: new Date(),
+            createdAt: new Date()
+        });
+        
+        console.log("Tamu baru dibuat:", newId, guestName);
+        return newId;
+    } catch (error) {
+        console.error("Error membuat tamu baru:", error);
+        return null;
+    }
+}
+
+// Perbaikan di Handle RSVP Form
+rsvpForm.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const attendance = document.getElementById('rsvpAttendance').value;
+    const guestsCount = document.getElementById('rsvpGuests').value;
+    
+    // Jika currentGuestId belum ada, buat tamu baru
+    if (!currentGuestId && currentGuestName) {
+        currentGuestId = await createNewGuest(currentGuestName);
+    }
+    
+    if (!currentGuestId) {
+        alert('Error: Tidak dapat mengidentifikasi tamu. Silakan refresh halaman.');
+        return;
+    }
+    
+    // Tampilkan loading
+    const submitBtn = this.querySelector('button[type="submit"]');
+    rsvpButtonText.innerHTML = '<div class="loading-spinner"></div> Mengirim...';
+    submitBtn.disabled = true;
+    
+    // Update status kehadiran di Firebase
+    const success = await updateGuestAttendance(currentGuestId, attendance, guestsCount);
+    
+    if (success) {
+        rsvpButtonText.textContent = 'Terkirim!';
+        
+        // Tampilkan pesan sukses
+        setTimeout(() => {
+            rsvpButtonText.textContent = 'Konfirmasi Terkirim';
+            submitBtn.disabled = true;
+            
+            // Nonaktifkan form setelah berhasil
+            rsvpForm.querySelectorAll('select').forEach(element => {
+                element.disabled = true;
+            });
+            
+            alert('Terima kasih telah mengonfirmasi kehadiran Anda!');
+        }, 1000);
+    } else {
+        rsvpButtonText.textContent = 'Gagal, coba lagi';
+        setTimeout(() => {
+            rsvpButtonText.textContent = 'Kirim Konfirmasi';
+            submitBtn.disabled = false;
+        }, 2000);
+    }
+});
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Tunggu Firebase siap
+            setTimeout(async () => {
+                await initAdminPanel();
+                await checkGuestParameter();
+                await loadWishes();
+                initGallery();
+                updateCountdown();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
