@@ -306,6 +306,18 @@
             z-index: -1;
         }
 
+        .account-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('/foto/IMG_9147.JPG') no-repeat center center/cover;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
         .section-title {
             text-align: center;
             font-size: 2.5rem;
@@ -369,6 +381,85 @@
             margin-top: 15px;
             font-style: italic;
             color: #666;
+        }
+
+        /* Account Section Styles */
+        .account-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            height: 100%;
+            transition: all 0.5s ease;
+            transform: translateY(50px);
+            opacity: 0;
+        }
+
+        .account-card.in-view {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .account-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .account-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            transform: scale(0);
+            transition: transform 0.6s ease 0.3s;
+        }
+
+        .account-card.in-view .account-icon {
+            transform: scale(1);
+        }
+
+        .account-title {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--secondary);
+        }
+
+        .account-number {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--dark);
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(212, 175, 55, 0.1);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .account-number:hover {
+            background: rgba(212, 175, 55, 0.2);
+            transform: scale(1.02);
+        }
+
+        .copy-account {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .copy-account:hover {
+            background: var(--secondary);
+            color: white;
+            transform: translateY(-2px);
         }
 
         .event-card {
@@ -965,8 +1056,8 @@
                             <p class="event-date">Sabtu, 13 Desember 2025</p>
                             <p class="event-time">08.00 WIB - 10.00 WIB</p>
                             <p class="event-location">Kediaman Mempelai Wanita</p>
-                            <p class="event-address">Darussalam Selatan 1 RT 003 RW 003, Kel. Batu Sari, Kec. Batuceper, Kota Tangerang</p>
-                            <a href="https://maps.app.goo.gl/y4GfUY6YZvyPP1zE8" target="_blank" class="btn-maps">
+                            <p class="event-address">Darussalam Selatan 1 RT 003 RW 003, Kel. Batu Sari, Kec. Batuceper, Kota Tangerang</p>
+                            <a href="https://maps.app.goo.gl/euP9h98uyT8AZULu7" target="_blank" class="btn-maps">
                                 <i class="fas fa-map-marker-alt"></i> Buka Maps
                             </a>
                         </div>
@@ -980,10 +1071,57 @@
                             <p class="event-date">Sabtu, 13 Desember 2025</p>
                             <p class="event-time">11.00 WIB - Selesai</p>
                             <p class="event-location">Kediaman Mempelai Wanita</p>
-                            <p class="event-address">Darussalam Selatan 1 RT 003 RW 003, Kel. Batu Sari, Kec. Batuceper, Kota Tangerang</p>
-                            <a href="https://maps.app.goo.gl/y4GfUY6YZvyPP1zE8" target="_blank" class="btn-maps">
+                            <p class="event-address">Darussalam Selatan 1 RT 003 RW 003, Kel. Batu Sari, Kec. Batuceper, Kota Tangerang</p>
+                            <a href="https://maps.app.goo.gl/euP9h98uyT8AZULu7" target="_blank" class="btn-maps">
                                 <i class="fas fa-map-marker-alt"></i> Buka Maps
                             </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Account Section -->
+        <section class="section-padding account-section">
+            <div class="container">
+                <h2 class="section-title">Rekening Kami</h2>
+                <div class="row justify-content-center">
+                    <div class="col-md-5 mb-4">
+                        <div class="account-card">
+                            <div class="account-icon">
+                                <i class="fas fa-female"></i>
+                            </div>
+                            <h3 class="account-title">Ika Wardah</h3>
+                            <p class="account-bank">Bank BCA</p>
+                            <div class="account-number" id="accountIka">
+                                8670290396
+                            </div>
+                            <button class="copy-account" data-account="8670290396">
+                                <i class="fas fa-copy"></i> Salin Nomor Rekening
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-5 mb-4">
+                        <div class="account-card">
+                            <div class="account-icon">
+                                <i class="fas fa-male"></i>
+                            </div>
+                            <h3 class="account-title">Tri Ramdona</h3>
+                            <p class="account-bank">Bank BCA</p>
+                            <div class="account-number" id="accountTri">
+                                7020590950
+                            </div>
+                            <button class="copy-account" data-account="7020590950">
+                                <i class="fas fa-copy"></i> Salin Nomor Rekening
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row justify-content-center mt-4">
+                    <div class="col-md-10">
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Bagi yang ingin memberikan kado atau bingkisan, Anda dapat mentransfer ke salah satu rekening di atas. Terima kasih atas perhatian dan doa restunya.
                         </div>
                     </div>
                 </div>
@@ -1472,7 +1610,7 @@
 
             // Observe all animatable elements
             const animatableElements = document.querySelectorAll(
-                '.couple-card, .event-card, .gallery-card, .rsvp-form, .wishes-container, .wish-item, .section-title'
+                '.couple-card, .event-card, .account-card, .gallery-card, .rsvp-form, .wishes-container, .wish-item, .section-title'
             );
             
             animatableElements.forEach(el => {
@@ -1844,6 +1982,16 @@ rsvpForm.addEventListener('submit', async function(e) {
     }
 });
 
+        // Initialize Account Copy Functionality
+        function initAccountCopy() {
+            document.querySelectorAll('.copy-account').forEach(button => {
+                button.addEventListener('click', function() {
+                    const accountNumber = this.getAttribute('data-account');
+                    copyToClipboard(accountNumber);
+                });
+            });
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', async function() {
             // Tunggu Firebase siap
@@ -1852,6 +2000,7 @@ rsvpForm.addEventListener('submit', async function(e) {
                 await checkGuestParameter();
                 await loadWishes();
                 initGallery();
+                initAccountCopy();
                 updateCountdown();
             }, 1000);
         });
